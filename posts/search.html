@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search — undrwrld_rcrds</title>
+<meta name="description" content="Search undrwrld_rcrds — find reviews, essays, and artist profiles across the publication.">
+<meta name="robots" content="noindex">
+<link rel="canonical" href="https://undrwrldrcrds.github.io/posts/search.html">
+<link rel="stylesheet" href="../style.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+<header class="masthead">
+  <h1><a href="../index.html">undrwrld<span class="underscore">_</span><span class="accent">rcrds</span></a></h1>
+  <p class="tagline">dispatches from the <em>undrwrld</em></p>
+  <nav class="primary">
+    <a href="../index.html">dispatch</a>
+    <a href="what-is-angelcore.html">angelcore</a>
+    <a href="what-is-aero.html">aero</a>
+    <a href="outsider-house-primer.html">outsider house</a>
+    <a href="artists-to-watch-2026.html">artists</a>
+    <a href="profiles.html">profiles</a>
+    <a href="reviews.html">reviews</a>
+    <a href="essays.html">essays</a>
+    <a href="essay-labels.html">labels</a>
+    <a href="search.html">search</a>
+    <a href="about.html">about</a>
+  </nav>
+</header>
+
+<main class="wrap">
+<article class="post">
+
+<p class="meta-line">Search · undrwrld_rcrds</p>
+
+<h1>Search</h1>
+<p class="dek">Find reviews, essays, profiles, and field guides across the publication.</p>
+
+<div style="margin: 3rem 0;">
+  <input type="search" id="search-input" placeholder="search artists, tracks, scenes..." autofocus
+    style="width: 100%; padding: 1rem 1.25rem; background: rgba(212,134,155,0.04); border: 1px solid rgba(212,134,155,0.2); border-radius: 2px; color: var(--bone, #f4eee2); font-family: 'JetBrains Mono', monospace; font-size: 1rem; outline: none;">
+  <p id="search-meta" style="margin-top: 0.75rem; color: var(--bone-dim, #b8b09e); font-size: 0.85rem; font-style: italic; opacity: 0.7;">type to search across the catalog</p>
+</div>
+
+<div id="search-results"></div>
+
+<script>
+let searchIndex = [];
+const $input = document.getElementById('search-input');
+const $results = document.getElementById('search-results');
+const $meta = document.getElementById('search-meta');
+
+fetch('../search-index.json')
+  .then(r => r.json())
+  .then(data => {
+    searchIndex = data;
+    $meta.textContent = `searching across ${data.length} dispatches`;
+  })
+  .catch(err => {
+    $meta.textContent = 'search index failed to load — try refreshing';
+    console.error(err);
+  });
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+function highlight(text, terms) {
+  let escaped = escapeHtml(text);
+  for (const term of terms) {
+    if (term.length < 2) continue;
+    const re = new RegExp('(' + term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+    escaped = escaped.replace(re, '<mark style="background: rgba(212,134,155,0.25); color: var(--bone); padding: 0 2px;">$1</mark>');
+  }
+  return escaped;
+}
+
+function search(q) {
+  if (!q || q.length < 2) {
+    $results.innerHTML = '';
+    $meta.textContent = searchIndex.length ? `searching across ${searchIndex.length} dispatches` : '';
+    return;
+  }
+  
+  const terms = q.toLowerCase().split(/\s+/).filter(t => t.length >= 2);
+  const scored = [];
+  
+  for (const item of searchIndex) {
+    const haystack = (item.title + ' ' + item.dek + ' ' + item.body).toLowerCase();
+    let score = 0;
+    for (const term of terms) {
+      const titleCount = (item.title.toLowerCase().match(new RegExp(term, 'g')) || []).length;
+      const dekCount = (item.dek.toLowerCase().match(new RegExp(term, 'g')) || []).length;
+      const bodyCount = (item.body.toLowerCase().match(new RegExp(term, 'g')) || []).length;
+      score += titleCount * 10 + dekCount * 3 + bodyCount;
+    }
+    if (score > 0) scored.push({item, score});
+  }
+  
+  scored.sort((a, b) => b.score - a.score);
+  
+  if (scored.length === 0) {
+    $results.innerHTML = '<p style="color: var(--bone-dim); font-style: italic; margin-top: 2rem;">no results. try different terms — artists, track names, scenes, or labels.</p>';
+    $meta.textContent = `0 results for "${q}"`;
+    return;
+  }
+  
+  $meta.textContent = `${scored.length} result${scored.length === 1 ? '' : 's'} for "${q}"`;
+  
+  $results.innerHTML = '<div class="post-list">' + scored.slice(0, 30).map(({item}) => {
+    const titleH = highlight(item.title, terms);
+    const dekH = highlight(item.dek, terms);
+    return `<article class="post-list-item">
+      <h3><a href="../${item.url}">${titleH}</a></h3>
+      <p>${dekH} <em>· ${escapeHtml(item.category)}</em></p>
+    </article>`;
+  }).join('') + '</div>';
+}
+
+let timer;
+$input.addEventListener('input', () => {
+  clearTimeout(timer);
+  timer = setTimeout(() => search($input.value.trim()), 120);
+});
+</script>
+
+</article>
+</main>
+
+<footer>
+  <div class="sigil">✝</div>
+  <div>undrwrld_rcrds — est. 2026</div>
+  <div class="socials">
+    <a href="../index.html">dispatch</a> · <a href="about.html">about</a> · <a href="mailto:undrwrld.rcrds@gmail.com">contact</a>
+  </div>
+</footer>
+
+</body>
+</html>

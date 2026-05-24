@@ -1,0 +1,529 @@
+/* undrwrld_rcrds — underground dance music records & dispatch */
+
+@import url('https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,700;1,400;1,500&family=JetBrains+Mono:wght@300;400;500&family=UnifrakturMaguntia&display=swap');
+
+:root {
+  --bone: #efe9dc;
+  --bone-dim: #d8d1c0;
+  --ink: #0a0a14;
+  --ink-soft: #1a1a26;
+  --rose: #d4869b;
+  --rose-dim: #8a5868;
+  --halo: #f4e4d6;
+  --bruise: #2a1a2e;
+  --static: #5a5a6a;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--ink);
+  color: var(--bone);
+  font-family: 'EB Garamond', Georgia, serif;
+  font-size: 18px;
+  line-height: 1.65;
+  min-height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* grain overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  opacity: 0.08;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+body::after {
+  content: '';
+  position: fixed;
+  top: -20%;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80vw;
+  height: 80vw;
+  max-width: 1200px;
+  max-height: 1200px;
+  background: radial-gradient(circle, var(--rose-dim) 0%, transparent 60%);
+  opacity: 0.15;
+  pointer-events: none;
+  z-index: -1;
+  filter: blur(80px);
+}
+
+/* —— layout —— */
+.wrap {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+header.masthead {
+  padding: 4rem 2rem 2rem;
+  text-align: center;
+  border-bottom: 1px solid var(--ink-soft);
+  position: relative;
+}
+
+/* wordmark: lowercase JetBrains Mono, restrained — appropriate for "rcrds" brand */
+.masthead h1 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  color: var(--halo);
+  line-height: 1;
+  margin-bottom: 0.5rem;
+}
+
+.masthead h1 a { color: inherit; text-decoration: none; }
+.masthead h1 .accent { color: var(--rose); }
+.masthead h1 .underscore { color: var(--rose-dim); }
+
+.masthead .tagline {
+  font-family: 'EB Garamond', serif;
+  font-style: italic;
+  font-size: 0.95rem;
+  letter-spacing: 0.05em;
+  color: var(--static);
+  margin-top: 0.8rem;
+}
+
+.masthead .tagline em {
+  color: var(--rose);
+  font-style: normal;
+  font-family: 'UnifrakturMaguntia', serif;
+  font-size: 1.1em;
+  letter-spacing: 0;
+}
+
+nav.primary {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+nav.primary a {
+  color: var(--bone-dim);
+  text-decoration: none;
+  padding-bottom: 2px;
+  border-bottom: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+nav.primary a:hover {
+  color: var(--rose);
+  border-bottom-color: var(--rose);
+}
+
+main { padding: 4rem 0 6rem; }
+
+.featured {
+  margin-bottom: 5rem;
+  padding-bottom: 4rem;
+  border-bottom: 1px solid var(--ink-soft);
+}
+
+.featured .label,
+.section-label {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--rose);
+  margin-bottom: 1.5rem;
+  display: block;
+}
+
+.featured h2 {
+  font-family: 'EB Garamond', serif;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.015em;
+  margin-bottom: 1.5rem;
+  color: var(--halo);
+}
+
+.featured h2 a {
+  color: inherit;
+  text-decoration: none;
+  background-image: linear-gradient(var(--rose), var(--rose));
+  background-size: 0% 1px;
+  background-position: 0 95%;
+  background-repeat: no-repeat;
+  transition: background-size 0.4s ease;
+}
+
+.featured h2 a:hover { background-size: 100% 1px; }
+
+.featured .dek {
+  font-size: 1.2rem;
+  font-style: italic;
+  color: var(--bone-dim);
+  margin-bottom: 1.5rem;
+  max-width: 60ch;
+}
+
+.byline {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--static);
+}
+
+.byline .sep { margin: 0 0.75rem; opacity: 0.5; }
+
+.posts-grid {
+  display: grid;
+  gap: 3rem;
+}
+
+article.preview {
+  display: grid;
+  grid-template-columns: 80px 1fr;
+  gap: 2rem;
+  align-items: start;
+  padding-bottom: 3rem;
+  border-bottom: 1px dashed var(--ink-soft);
+}
+
+article.preview:last-child { border-bottom: none; }
+
+.preview .index {
+  font-family: 'UnifrakturMaguntia', serif;
+  font-size: 2.5rem;
+  color: var(--rose-dim);
+  line-height: 1;
+  padding-top: 0.5rem;
+}
+
+.preview h3 {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.7rem;
+  font-weight: 500;
+  line-height: 1.15;
+  margin-bottom: 0.75rem;
+  letter-spacing: -0.01em;
+}
+
+.preview h3 a {
+  color: var(--halo);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+.preview h3 a:hover { color: var(--rose); }
+
+.preview .excerpt {
+  color: var(--bone-dim);
+  font-size: 1.05rem;
+  margin-bottom: 1rem;
+}
+
+.preview .tags {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  color: var(--static);
+  letter-spacing: 0.1em;
+}
+
+.preview .tags span {
+  display: inline-block;
+  margin-right: 0.75rem;
+}
+
+.preview .tags span::before { content: '#'; opacity: 0.6; }
+
+/* —— post pages —— */
+article.post { padding-top: 2rem; }
+
+article.post .post-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--rose);
+  margin-bottom: 1.5rem;
+}
+
+article.post h1 {
+  font-family: 'EB Garamond', serif;
+  font-size: clamp(2.4rem, 5.5vw, 3.8rem);
+  font-weight: 500;
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+  margin-bottom: 1.5rem;
+  color: var(--halo);
+}
+
+article.post .dek {
+  font-size: 1.3rem;
+  font-style: italic;
+  color: var(--bone-dim);
+  line-height: 1.5;
+  margin-bottom: 2rem;
+  max-width: 60ch;
+  border-left: 2px solid var(--rose);
+  padding-left: 1.5rem;
+}
+
+article.post .byline {
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 1px solid var(--ink-soft);
+}
+
+article.post p,
+article.post ul,
+article.post ol,
+article.post blockquote {
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  line-height: 1.75;
+  color: var(--bone);
+}
+
+article.post p:first-of-type::first-letter {
+  font-family: 'UnifrakturMaguntia', serif;
+  font-size: 4rem;
+  float: left;
+  line-height: 0.85;
+  padding: 0.3rem 0.8rem 0 0;
+  color: var(--rose);
+}
+
+article.post h2 {
+  font-family: 'EB Garamond', serif;
+  font-size: 1.8rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  margin: 3rem 0 1rem;
+  color: var(--halo);
+  position: relative;
+  padding-left: 1.5rem;
+}
+
+article.post h2::before {
+  content: '✝';
+  position: absolute;
+  left: 0;
+  color: var(--rose);
+  font-size: 1rem;
+  top: 0.5rem;
+}
+
+article.post h3 {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  font-weight: 500;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin: 2.5rem 0 0.8rem;
+  color: var(--rose);
+}
+
+article.post a {
+  color: var(--rose);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rose-dim);
+  transition: all 0.2s;
+}
+
+article.post a:hover {
+  color: var(--halo);
+  border-bottom-color: var(--halo);
+}
+
+article.post ul, article.post ol { padding-left: 2rem; }
+article.post li { margin-bottom: 0.5rem; }
+
+article.post blockquote {
+  border-left: 2px solid var(--rose);
+  padding: 0.5rem 0 0.5rem 2rem;
+  font-style: italic;
+  font-size: 1.25rem;
+  color: var(--bone-dim);
+  margin: 2rem 0;
+}
+
+article.post hr {
+  border: none;
+  text-align: center;
+  margin: 3rem 0;
+  color: var(--rose-dim);
+  font-family: 'UnifrakturMaguntia', serif;
+}
+
+article.post hr::after {
+  content: '✠   ✠   ✠';
+  letter-spacing: 1rem;
+  font-size: 0.8rem;
+  opacity: 0.6;
+}
+
+.embed-card {
+  background: var(--ink-soft);
+  border: 1px solid var(--bruise);
+  padding: 1.5rem;
+  margin: 2rem 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.embed-card .art {
+  width: 64px;
+  height: 64px;
+  background: linear-gradient(135deg, var(--rose-dim), var(--bruise));
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+}
+
+.embed-card .art::after {
+  content: '◐';
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: var(--bone);
+  opacity: 0.4;
+}
+
+.embed-card .meta { flex: 1; line-height: 1.4; }
+.embed-card .meta .platform { color: var(--rose); text-transform: uppercase; letter-spacing: 0.2em; font-size: 0.7rem; }
+.embed-card .meta .title { color: var(--halo); font-size: 1rem; margin: 0.3rem 0; font-family: 'EB Garamond', serif; font-style: italic; }
+.embed-card .meta .artist { color: var(--bone-dim); font-size: 0.75rem; }
+.embed-card a { color: var(--rose); text-decoration: none; border: 1px solid var(--rose-dim); padding: 0.5rem 1rem; font-size: 0.7rem; letter-spacing: 0.15em; text-transform: uppercase; transition: all 0.2s; }
+.embed-card a:hover { background: var(--rose-dim); color: var(--halo); }
+
+.artist-block {
+  margin: 2.5rem 0;
+  padding: 2rem;
+  background: linear-gradient(180deg, transparent, var(--ink-soft));
+  border-left: 3px solid var(--rose);
+}
+
+.artist-block h3 {
+  font-family: 'EB Garamond', serif !important;
+  font-size: 1.6rem !important;
+  text-transform: none !important;
+  letter-spacing: -0.01em !important;
+  color: var(--halo) !important;
+  margin: 0 0 0.3rem !important;
+  font-style: italic;
+}
+
+.artist-block .origin {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--rose);
+  margin-bottom: 1rem;
+}
+
+footer {
+  border-top: 1px solid var(--ink-soft);
+  padding: 3rem 2rem;
+  text-align: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--static);
+}
+
+footer .sigil {
+  font-family: 'UnifrakturMaguntia', serif;
+  font-size: 2rem;
+  color: var(--rose-dim);
+  margin-bottom: 1rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+footer a { color: var(--bone-dim); text-decoration: none; border-bottom: 1px solid transparent; transition: border-color 0.2s; }
+footer a:hover { border-bottom-color: var(--rose); }
+
+footer .socials { margin: 1rem 0; }
+footer .socials a { margin: 0 0.6rem; }
+
+@media (max-width: 640px) {
+  .wrap { padding: 0 1.25rem; }
+  header.masthead { padding: 3rem 1rem 2rem; }
+  article.preview { grid-template-columns: 50px 1fr; gap: 1rem; }
+  .preview .index { font-size: 1.8rem; }
+  article.post p:first-of-type::first-letter { font-size: 3rem; }
+  nav.primary { gap: 1.2rem; font-size: 0.7rem; }
+  body { font-size: 17px; }
+}
+
+/* index pages — reviews/essays/profiles listing */
+.post-list {
+  margin: 2rem 0 3rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.post-list-item {
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid rgba(212, 134, 155, 0.15);
+}
+
+.post-list-item:last-child {
+  border-bottom: none;
+}
+
+.post-list-item h3 {
+  margin: 0 0 0.5rem;
+  font-family: 'EB Garamond', serif;
+  font-size: 1.4rem;
+  font-style: italic;
+  line-height: 1.3;
+}
+
+.post-list-item h3 a {
+  color: var(--bone, #f4eee2);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.post-list-item h3 a:hover {
+  border-bottom-color: var(--rose, #d4869b);
+}
+
+.post-list-item p {
+  margin: 0;
+  color: var(--bone-dim, #b8b09e);
+  font-size: 0.95rem;
+  line-height: 1.55;
+}
+
+.post-list-item p em {
+  font-size: 0.85rem;
+  opacity: 0.6;
+  font-style: italic;
+  white-space: nowrap;
+}
